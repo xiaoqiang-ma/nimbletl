@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Tuple
 
 from common.db import get_dataframe
 from common.time_util import get_now_date
@@ -74,6 +74,97 @@ def get_sorted_unexecuted_for_time_window_1_param_day(etl_name=None, start_date_
     executed_successful_date_list = _get_successful_log_for_time_window_1_param_day(etl_name, start_date_str)
 
     all_date_list = _get_all_date_list_for_time_window_1_param_day(start_date_str, date_offset)
+
+    unprocessed_date_list = [date_temp for date_temp in all_date_list if
+                             date_temp not in executed_successful_date_list]
+    unprocessed_date_list.sort()
+    return unprocessed_date_list
+
+
+def _get_successful_log_for_time_window_2_param(etl_name) -> List[Tuple[str, str]]:
+    """
+    获取log表中已执行成功的时间序列list
+    :param etl_name:
+    :param start_date_str:
+    :return:
+    """
+
+    sql_str = f"""
+        SELECT drive_value
+        FROM log_drive_table
+        WHERE etl_name = '{etl_name}' and etl_result = 1
+        order by drive_value;
+    """
+
+    result_df = get_dataframe(sql_str)
+
+    result_list = []
+    for drive_value in result_df['drive_value']:
+        result_list.append(tuple(tmp.strip() for tmp in drive_value.split(',')))
+    return result_list
+
+
+def _get_all_date_list_for_time_window_2_param(start_datetime_str, time_interval) -> List[Tuple[str, str]]:
+    """
+    从给定的开始时间开始，以给定的时间间隔生成时间序列。
+
+    参数：
+    start_datetime_str : str
+        开始时间字符串，格式为 'yyyy-MM-dd HH:mm:ss'。
+    time_interval : int
+        时间间隔，单位为分钟。
+
+    返回：
+    list
+        包含时间间隔的元组列表，每个元组包含开始时间和结束时间。
+    """
+    # 将开始时间字符串转换为 datetime 对象
+    start_datetime = datetime.datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M:%S')
+
+    # 获取当前时间
+    end_datetime = datetime.datetime.now()
+
+    # 初始化结果列表
+    time_intervals = []
+
+    # 开始时间
+    current_datetime = start_datetime
+
+    # 生成时间间隔列表
+    while current_datetime < end_datetime:
+        # 计算结束时间
+        end_interval = current_datetime + datetime.timedelta(minutes=time_interval)
+
+        # 如果结束时间超过当前时间，则设置结束时间为当前时间
+        if end_interval > end_datetime:
+            break
+
+        # 添加时间间隔到结果列表中
+        time_intervals.append((current_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                               end_interval.strftime('%Y-%m-%d %H:%M:%S')))
+
+        # 更新当前时间为结束时间，以便下一次循环
+        current_datetime = end_interval
+
+    return time_intervals
+
+
+def get_sorted_unexecuted_for_time_window_2_param_day(etl_name=None, start_datetime_str=None, time_interval=1440) -> List[Tuple[str, str]]:
+    """
+    从给定的开始时间开始，以给定的时间间隔生成时间序列。返回未执行的时间序列
+    :param etl_name:
+    :param start_datetime_str: 格式：'%Y-%m-%d %H:%M:%S
+    :param time_interval: 单位分钟。默认1440秒
+    :return:
+    """
+    if etl_name is None:
+        raise ValueError("No parameter etl_name was passed.")
+    if start_datetime_str is None:
+        raise ValueError("No parameter start_date_str was passed.")
+
+    executed_successful_date_list = _get_successful_log_for_time_window_2_param(etl_name)
+
+    all_date_list = _get_all_date_list_for_time_window_2_param(start_datetime_str, time_interval)
 
     unprocessed_date_list = [date_temp for date_temp in all_date_list if
                              date_temp not in executed_successful_date_list]
