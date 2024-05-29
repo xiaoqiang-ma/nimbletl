@@ -1,6 +1,6 @@
-import setuptools
-import os
 import json
+
+import setuptools
 
 
 def parse_pipfile_lock():
@@ -12,7 +12,7 @@ def parse_pipfile_lock():
 
 setuptools.setup(
     name='nimbletl',
-    version='0.1.6',
+    version='0.1.7',
     packages=setuptools.find_packages(),
     install_requires=parse_pipfile_lock(),
     entry_points={
