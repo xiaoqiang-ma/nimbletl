@@ -12,7 +12,7 @@ def parse_pipfile_lock():
 
 setuptools.setup(
     name='nimbletl',
-    version='0.1.7',
+    version='0.1.8',
     packages=setuptools.find_packages(),
     install_requires=parse_pipfile_lock(),
     entry_points={

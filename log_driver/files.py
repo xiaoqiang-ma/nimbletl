@@ -34,8 +34,8 @@ def get_sorted_unexecuted_file_list(get_file_list_from_file_systems: Callable[..
     :param kwargs:
     :return:
     """
-    all_file_list = get_file_list_from_file_systems(*args, **kwargs)
     executed_successful_file_list = _get_successful_log_for_files(etl_name)
+    all_file_list = get_file_list_from_file_systems(*args, **kwargs)
     unprocessed_file_list = list(set(all_file_list).symmetric_difference(set(executed_successful_file_list)))
     unprocessed_file_list.sort()
     return unprocessed_file_list

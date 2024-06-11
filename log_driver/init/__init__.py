@@ -8,6 +8,6 @@ LOG_DRIVE_DDL = """
         process_start_time DATETIME NOT NULL COMMENT 'ETL 处理开始时间',
         process_end_time DATETIME NOT NULL COMMENT 'ETL 处理结束时间',
         etl_result INT NOT NULL COMMENT 'ETL 处理结果,目前枚举值包括：0-执行失败；1-执行成功；2-执行中',
-        bisiness_time VARCHAR(255) COMMENT '本批次数据涉及到的业务时间，单位天，逗号分割'
+        business_time VARCHAR(255) COMMENT '本批次数据涉及到的业务日期，逗号分割'
     ) COMMENT='日志驱动表';
 """
