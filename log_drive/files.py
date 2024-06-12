@@ -1,6 +1,6 @@
 from typing import Callable, List
 
-from common.db import get_dataframe
+from common.nimbletl_db import get_dataframe
 
 
 def _get_successful_log_for_files(etl_name: str) -> List[str]:

@@ -12,12 +12,12 @@ def parse_pipfile_lock():
 
 setuptools.setup(
     name='nimbletl',
-    version='0.1.8',
+    version='0.1.10',
     packages=setuptools.find_packages(),
     install_requires=parse_pipfile_lock(),
     entry_points={
         'console_scripts': [
-            'nimbletl=log_driver.init.cli:main',
+            'nimbletl=log_drive.init.cli:main',
         ],
     },
     author="Ma Xiaoqiang",

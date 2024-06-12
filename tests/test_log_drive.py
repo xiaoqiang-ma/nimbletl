@@ -1,10 +1,12 @@
 from datetime import date, datetime
 from typing import List
 
-from log_driver.files import get_sorted_unexecuted_file_list
-from log_driver.time_windows import get_sorted_unexecuted_for_time_window_1_param_day, \
-    get_sorted_unexecuted_for_time_window_2_param
-from log_driver.upstream import get_sorted_unexecuted_upstream_job_list
+from common.nimble_enum import LogDriveType
+from log_drive.files import get_sorted_unexecuted_file_list
+from log_drive.log_drive_common import set_log_success
+from log_drive.time_windows import get_sorted_unexecuted_for_time_window_1_param_day, \
+    get_sorted_unexecuted_for_time_window_2_param, save_log_for_time_window_2_param
+from log_drive.upstream import get_sorted_unexecuted_upstream_job_list
 
 """
 INSERT INTO nimbletl.log_drive_table (id, etl_name, target_table_name, drive_type, drive_value, process_start_time, process_end_time, etl_result, business_time) VALUES (1, 'A_etl', 'a_target_name', 'time_window_1_param_day', '2024-04-01', '2024-05-29 17:34:00', '2024-05-29 17:34:04', 1, '2024-03-12, 2024-02-13');
@@ -48,8 +50,27 @@ def test_get_sorted_unexecuted_upstream_job_list():
     print(result)
 
 
+def test_save_log_for_time_window_2_param():
+    etl_name = 'test_etl'
+    start_datetime = datetime(2024, 6, 10, 15, 30, 0)
+    end_datetime = datetime(2024, 6, 11, 15, 30, 0)
+    datetime_tmp = (start_datetime, end_datetime)
+    target_table_name = ''
+    drive_type = LogDriveType.TIME_WINDOW_2_PARAM.value
+    id = save_log_for_time_window_2_param(etl_name, datetime_tmp, target_table_name, drive_type)
+    print(f'insert id: {id}')
+    return id
+
+
+def test_set_log_success():
+    log_id = test_save_log_for_time_window_2_param()
+    set_log_success(log_id)
+
+
 if __name__ == '__main__':
     test_get_sorted_unexecuted_for_time_window_1_param_day()
     test_get_sorted_unexecuted_for_time_window_2_param()
     test_get_sorted_unexecuted_file_list()
     test_get_sorted_unexecuted_upstream_job_list()
+    test_save_log_for_time_window_2_param()
+    test_set_log_success()

@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta, date
 from typing import List, Tuple
 
-from common.db import get_dataframe
+from common.nimble_enum import EtlStatusEnum, LogDriveType
+from common.nimbletl_db import get_dataframe, save_obj
 from common.time_util import get_now_date
+from log_drive.log_drive_table import LogDriveTable
 
 
 def _get_successful_log_for_time_window_1_param_day(etl_name: str) -> List[date]:
@@ -108,7 +110,8 @@ def get_sorted_unexecuted_for_time_window_1_param_day(etl_name: str = None, star
     return unprocessed_date_list
 
 
-def _get_all_date_list_for_time_window_2_param(start_datetime: datetime, time_interval: int) -> List[Tuple[datetime, datetime]]:
+def _get_all_date_list_for_time_window_2_param(start_datetime: datetime, time_interval: int) -> List[
+    Tuple[datetime, datetime]]:
     """
     :param start_datetime: 开始时间
     :param time_interval: 时间间隔，单位为分钟。
@@ -163,3 +166,21 @@ def get_sorted_unexecuted_for_time_window_2_param(etl_name: str = None, start_da
     unprocessed_date_list = list(set(all_date_list).symmetric_difference(set(executed_successful_date_list)))
     unprocessed_date_list.sort()
     return unprocessed_date_list
+
+
+def save_log_for_time_window_2_param(etl_name: str, datetime_tmp: Tuple[datetime, datetime], target_table_name: str,
+                                     drive_type: str) -> int:
+    def convert_tuple_to_string(x: Tuple[datetime, datetime]) -> str:
+        # 将两个 datetime 对象格式化为字符串
+        start_str = x[0].strftime('%Y-%m-%d %H:%M:%S')
+        end_str = x[1].strftime('%Y-%m-%d %H:%M:%S')
+
+        # 使用逗号分割
+        result = f"{start_str}, {end_str}"
+        return result
+
+    process_start_time = datetime.now()
+    log_drive_table = LogDriveTable(etl_name=etl_name, target_table_name=target_table_name, drive_type=drive_type,
+                                    drive_value=convert_tuple_to_string(datetime_tmp),
+                                    process_start_time=process_start_time, etl_result=EtlStatusEnum.RUNNING.value)
+    return save_obj(log_drive_table)

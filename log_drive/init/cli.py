@@ -1,7 +1,7 @@
 import click
 
-from log_driver.init.init_drive_db import initialize_database
-from log_driver.init.load_config_to_env import load_config
+from log_drive.init.init_drive_db import initialize_database
+from log_drive.init.load_config_to_env import load_config
 
 
 @click.group()

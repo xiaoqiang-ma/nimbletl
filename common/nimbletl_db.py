@@ -3,6 +3,10 @@ import os
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+Base = declarative_base()
 
 
 def _get_drive_db_url():
@@ -14,14 +18,15 @@ def _get_drive_db_url():
     return f'mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 
 
-def _get_engine():
-    return create_engine(_get_drive_db_url())
+DATABASE_URI = _get_drive_db_url()
+drive_db_engine = create_engine(DATABASE_URI)
+session = sessionmaker(bind=drive_db_engine)()
 
 
 def get_dataframe(sql_str):
     try:
         # 使用同一个数据库连接对象
-        engine = _get_engine()
+        engine = drive_db_engine
         df = pd.read_sql_query(sql_str, con=engine.connect())
         return df
     except SQLAlchemyError as e:
@@ -34,7 +39,7 @@ def get_dataframe(sql_str):
 def execute_sql(sql_str):
     try:
         # 使用同一个数据库连接对象
-        engine = _get_engine()
+        engine = drive_db_engine
         with engine.connect() as connection:
             connection.execute(sql_str)
         print("Table created successfully.")
@@ -43,3 +48,17 @@ def execute_sql(sql_str):
     finally:
         if connection:
             connection.close()
+
+
+def save_obj(ojb: Base):
+    try:
+        session.add(ojb)
+        session.commit()
+        return ojb.id
+    except Exception as e:
+        session.rollback()
+        print(f"Error inserting log: {e}")
+    finally:
+        session.close()
+
+

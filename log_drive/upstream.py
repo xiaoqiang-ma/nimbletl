@@ -1,7 +1,7 @@
 from datetime import datetime, date
 from typing import Tuple, List
 
-from common.db import get_dataframe
+from common.nimbletl_db import get_dataframe
 
 
 def _get_successful_log_for_upstream(etl_name: str) -> List[int]:
